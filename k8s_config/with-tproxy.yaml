@@ -11,7 +11,6 @@ spec:
     protocol: TCP
     port: 9090
     targetPort: 9090
-
 ---
 # Web frontend
 apiVersion: apps/v1
@@ -31,7 +30,6 @@ spec:
         app: web
       annotations:
         "consul.hashicorp.com/connect-inject": "true"
-        "consul.hashicorp.com/connect-service-protocol": "http"
     spec:
       containers:
       - name: web
@@ -49,7 +47,27 @@ spec:
           value: "Hello World"
         - name: "HTTP_CLIENT_KEEP_ALIVES"
           value: "false"
-
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceDefaults
+metadata:
+  name: web
+spec:
+  protocol: "http"
+---
+# Service to expose web frontend
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+spec:
+  selector:
+    app: api
+  ports:
+  - name: http
+    protocol: TCP
+    port: 9090
+    targetPort: 9090
 ---
 # API service version 2
 apiVersion: apps/v1
@@ -69,7 +87,6 @@ spec:
         app: api
       annotations:
         "consul.hashicorp.com/connect-inject": "true"
-        "consul.hashicorp.com/connect-service-protocol": "http"
     spec:
       containers:
       - name: api
@@ -83,3 +100,10 @@ spec:
           value: "api"
         - name: "MESSAGE"
           value: "Response from API"
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceDefaults
+metadata:
+  name: api
+spec:
+  protocol: "http"
